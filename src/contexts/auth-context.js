@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
@@ -10,43 +11,49 @@ const HANDLERS = {
 const initialState = {
   isAuthenticated: false,
   isLoading: true,
-  user: null
+  user: null,
+  access_token: null,
 };
 
 const handlers = {
   [HANDLERS.INITIALIZE]: (state, action) => {
-    const user = action.payload;
-
+    console.log('Auth-context: initialize', {
+      ...state,
+      ...(action.payload)
+    });
     return {
       ...state,
-      ...(
-        // if payload (user) is provided, then is authenticated
-        user
-          ? ({
-            isAuthenticated: true,
-            isLoading: false,
-            user
-          })
-          : ({
-            isLoading: false
-          })
-      )
+      ...(action.payload),
+      isLoading: false,
     };
   },
   [HANDLERS.SIGN_IN]: (state, action) => {
-    const user = action.payload;
+    console.log('Auth-context: singIn');
+    const { user, access_token} = action.payload;
+
+    window.sessionStorage.setItem('authenticated', 'true');
+    window.sessionStorage.setItem('user', JSON.stringify(user));
+    window.sessionStorage.setItem('access_token', access_token);
 
     return {
       ...state,
       isAuthenticated: true,
-      user
+      user,
+      access_token,
     };
   },
   [HANDLERS.SIGN_OUT]: (state) => {
+    console.log('Auth-context: singOut');
+    
+    window.sessionStorage.setItem('authenticated', 'false');
+    window.sessionStorage.setItem('user', '');
+    window.sessionStorage.setItem('access_token', '');
+
     return {
       ...state,
       isAuthenticated: false,
-      user: null
+      user: null,
+      access_token: null,
     };
   }
 };
@@ -69,33 +76,24 @@ export const AuthProvider = (props) => {
     if (initialized.current) {
       return;
     }
-
     initialized.current = true;
 
-    let isAuthenticated = false;
-
     try {
-      isAuthenticated = window.sessionStorage.getItem('authenticated') === 'true';
+      const isAuthenticated = window.sessionStorage.getItem('authenticated') === 'true';
+      const user = JSON.parse(window.sessionStorage.getItem('user'));
+      const access_token = window.sessionStorage.getItem('access_token');
+
+      return dispatch({
+        type: HANDLERS.INITIALIZE,
+        payload: {
+          isAuthenticated,
+          user,
+          isLoading: Boolean(user),
+          access_token,
+        }
+      });
     } catch (err) {
       console.error(err);
-    }
-
-    if (isAuthenticated) {
-      const user = {
-        id: '5e86809283e28b96d2d38537',
-        avatar: '/assets/avatars/avatar-anika-visser.png',
-        name: 'Anika Visser',
-        email: 'anika.visser@devias.io'
-      };
-
-      dispatch({
-        type: HANDLERS.INITIALIZE,
-        payload: user
-      });
-    } else {
-      dispatch({
-        type: HANDLERS.INITIALIZE
-      });
     }
   };
 
@@ -107,48 +105,30 @@ export const AuthProvider = (props) => {
     []
   );
 
-  const skip = () => {
+  const signIn = async (username, password) => {
     try {
-      window.sessionStorage.setItem('authenticated', 'true');
-    } catch (err) {
-      console.error(err);
+      const response = await axios({
+        method: "post",
+        url: "http://localhost:4000/signin",  
+        responseType: 'json',
+        data: {
+          username: username,
+          password,
+        }
+      });  
+
+      dispatch({
+        type: HANDLERS.SIGN_IN,
+        payload: {
+          user: {
+            _username: response.data._authenticatedUser.username,
+          },
+          access_token: response.data._token
+        }
+      });
+    } catch (loginError) {
+      throw new Error(loginError.response.data.message)
     }
-
-    const user = {
-      id: '5e86809283e28b96d2d38537',
-      avatar: '/assets/avatars/avatar-anika-visser.png',
-      name: 'Anika Visser',
-      email: 'anika.visser@devias.io'
-    };
-
-    dispatch({
-      type: HANDLERS.SIGN_IN,
-      payload: user
-    });
-  };
-
-  const signIn = async (email, password) => {
-    if (email !== 'demo@devias.io' || password !== 'Password123!') {
-      throw new Error('Please check your email and password');
-    }
-
-    try {
-      window.sessionStorage.setItem('authenticated', 'true');
-    } catch (err) {
-      console.error(err);
-    }
-
-    const user = {
-      id: '5e86809283e28b96d2d38537',
-      avatar: '/assets/avatars/avatar-anika-visser.png',
-      name: 'Anika Visser',
-      email: 'anika.visser@devias.io'
-    };
-
-    dispatch({
-      type: HANDLERS.SIGN_IN,
-      payload: user
-    });
   };
 
   const signUp = async (email, name, password) => {
@@ -165,7 +145,6 @@ export const AuthProvider = (props) => {
     <AuthContext.Provider
       value={{
         ...state,
-        skip,
         signIn,
         signUp,
         signOut
