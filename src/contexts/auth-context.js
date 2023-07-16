@@ -94,6 +94,15 @@ export const AuthProvider = (props) => {
       });
     } catch (err) {
       console.error(err);
+      return dispatch({
+        type: HANDLERS.INITIALIZE,
+        payload: {
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+          access_token: null,
+        }
+      });
     }
   };
 
@@ -121,7 +130,7 @@ export const AuthProvider = (props) => {
         type: HANDLERS.SIGN_IN,
         payload: {
           user: {
-            _username: response.data._authenticatedUser.username,
+            _username: response.data._authenticatedUser._username,
           },
           access_token: response.data._token
         }

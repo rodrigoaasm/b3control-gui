@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import NextLink from 'next/link';
 import { Box, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { Logo } from 'src/components/logo';
+import { display } from '@mui/system';
 
 // TODO: Change subtitle text
 
@@ -37,7 +38,8 @@ export const Layout = (props) => {
               p: 3,
               position: 'fixed',
               top: 0,
-              width: '100%'
+              width: '100%',
+              display: 'flex'
             }}
           >
             <Box
@@ -50,6 +52,21 @@ export const Layout = (props) => {
               }}
             >
               <Logo />
+            </Box>
+            <Box
+              component="span"
+              sx={{
+                color: 'neutral.400',
+                flexGrow: 1,
+                fontFamily: (theme) => theme.typography.fontFamily,
+                fontSize: 22,
+                fontWeight: 600,
+                lineHeight: '32px',
+                paddingLeft: '10px',
+                textAlign: 'left' 
+              }}
+            >
+                B3 Controle
             </Box>
           </Box>
           {children}

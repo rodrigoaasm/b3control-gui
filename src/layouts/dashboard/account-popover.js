@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { Box, Divider, MenuItem, MenuList, Popover, Typography } from '@mui/material';
 import { useAuth } from 'src/hooks/use-auth';
+import { AuthConsumer } from 'src/contexts/auth-context';
 
 export const AccountPopover = (props) => {
   const { anchorEl, onClose, open } = props;
@@ -42,7 +43,9 @@ export const AccountPopover = (props) => {
           color="text.secondary"
           variant="body2"
         >
-          Anika Visser
+          <AuthConsumer>
+            { auth => <span>{auth.user?._username ?? ''}</span>}
+          </AuthConsumer>
         </Typography>
       </Box>
       <Divider />
