@@ -35,7 +35,7 @@ const useChartOptions = (labels) => {
     },
     plotOptions: {
       pie: {
-        expandOnClick: false
+        expandOnClick: true
       }
     },
     states: {
@@ -80,18 +80,18 @@ const iconMap = {
   )
 };
 
-export const OverviewTraffic = (props) => {
-  const { chartSeries, labels, sx } = props;
-  const chartOptions = useChartOptions(labels);
+export const OverviewPositions = (props) => {
+  const { positionSeries, sx } = props;
+  const chartOptions = useChartOptions(positionSeries.map((position) => position.itemName));
 
   return (
     <Card sx={sx}>
-      <CardHeader title="Traffic Source" />
+      <CardHeader title="Posições" />
       <CardContent>
         <Chart
           height={300}
           options={chartOptions}
-          series={chartSeries}
+          series={positionSeries.map((position) => position.percentage)}
           type="donut"
           width="100%"
         />
@@ -102,30 +102,27 @@ export const OverviewTraffic = (props) => {
           spacing={2}
           sx={{ mt: 2 }}
         >
-          {chartSeries.map((item, index) => {
-            const label = labels[index];
-
+          {positionSeries.map((position, index) => {
             return (
               <Box
-                key={label}
+                key={position.itemName}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center'
                 }}
               >
-                {iconMap[label]}
                 <Typography
                   sx={{ my: 1 }}
                   variant="h6"
                 >
-                  {label}
+                  {position.itemName}
                 </Typography>
                 <Typography
                   color="text.secondary"
                   variant="subtitle2"
                 >
-                  {item}%
+                  {position.percentage}%
                 </Typography>
               </Box>
             );
@@ -136,7 +133,7 @@ export const OverviewTraffic = (props) => {
   );
 };
 
-OverviewTraffic.propTypes = {
+OverviewPositions.propTypes = {
   chartSeries: PropTypes.array.isRequired,
   labels: PropTypes.array.isRequired,
   sx: PropTypes.object

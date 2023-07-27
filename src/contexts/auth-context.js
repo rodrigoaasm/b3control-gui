@@ -63,7 +63,6 @@ const reducer = (state, action) => (
 );
 
 // The role of this context is to propagate authentication state through the App tree.
-
 export const AuthContext = createContext({ undefined });
 
 export const AuthProvider = (props) => {
@@ -155,7 +154,7 @@ export const AuthProvider = (props) => {
       value={{
         ...state,
         signIn,
-        signUp,
+
         signOut
       }}
     >

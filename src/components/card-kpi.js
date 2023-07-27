@@ -1,11 +1,19 @@
 import PropTypes from 'prop-types';
 import ArrowDownIcon from '@heroicons/react/24/solid/ArrowDownIcon';
 import ArrowUpIcon from '@heroicons/react/24/solid/ArrowUpIcon';
-import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
 import { Avatar, Card, CardContent, Stack, SvgIcon, Typography } from '@mui/material';
 
-export const OverviewTotalCustomers = (props) => {
-  const { difference, positive = false, sx, value } = props;
+export const CardKPI = (props) => {
+  const {
+    title,
+    positiveLegend,
+    icon,
+    iconBackground,
+    difference,
+    positive = false,
+    sx, 
+    value,
+  } = props;
 
   return (
     <Card sx={sx}>
@@ -21,7 +29,7 @@ export const OverviewTotalCustomers = (props) => {
               color="text.secondary"
               variant="overline"
             >
-              Total Customers
+              {title}
             </Typography>
             <Typography variant="h4">
               {value}
@@ -29,13 +37,13 @@ export const OverviewTotalCustomers = (props) => {
           </Stack>
           <Avatar
             sx={{
-              backgroundColor: 'success.main',
+              backgroundColor: iconBackground,
               height: 56,
               width: 56
             }}
           >
             <SvgIcon>
-              <UsersIcon />
+              {icon}
             </SvgIcon>
           </Avatar>
         </Stack>
@@ -68,7 +76,7 @@ export const OverviewTotalCustomers = (props) => {
               color="text.secondary"
               variant="caption"
             >
-              Since last month
+              {positiveLegend}
             </Typography>
           </Stack>
         )}
@@ -77,10 +85,13 @@ export const OverviewTotalCustomers = (props) => {
   );
 };
 
-OverviewTotalCustomers.propTypes = {
+CardKPI.prototypes = {
   difference: PropTypes.number,
   positive: PropTypes.bool,
+  sx: PropTypes.object,
   value: PropTypes.string.isRequired,
-  sx: PropTypes.object
+  title: PropTypes.string.isRequired,
+  positiveLegend: PropTypes.string,
+  icon: PropTypes.object.isRequired,
+  iconBackground: PropTypes.string.isRequired,
 };
-
