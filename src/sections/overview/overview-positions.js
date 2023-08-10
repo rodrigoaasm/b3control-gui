@@ -1,140 +1,104 @@
+import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import ComputerDesktopIcon from '@heroicons/react/24/solid/ComputerDesktopIcon';
-import DeviceTabletIcon from '@heroicons/react/24/solid/DeviceTabletIcon';
-import PhoneIcon from '@heroicons/react/24/solid/PhoneIcon';
+import ArrowRightIcon from '@heroicons/react/24/solid/ArrowRightIcon';
 import {
   Box,
+  Button,
   Card,
-  CardContent,
+  CardActions,
   CardHeader,
-  Stack,
+  Divider,
   SvgIcon,
-  Typography,
-  useTheme
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow
 } from '@mui/material';
-import { Chart } from 'src/components/chart';
+import { Scrollbar } from 'src/components/scrollbar';
+import { SeverityPill } from 'src/components/severity-pill';
 
-const useChartOptions = (labels) => {
-  const theme = useTheme();
-
-  return {
-    chart: {
-      background: 'transparent'
-    },
-    colors: [
-      theme.palette.primary.main,
-      theme.palette.success.main,
-      theme.palette.warning.main
-    ],
-    dataLabels: {
-      enabled: false
-    },
-    labels,
-    legend: {
-      show: false
-    },
-    plotOptions: {
-      pie: {
-        expandOnClick: true
-      }
-    },
-    states: {
-      active: {
-        filter: {
-          type: 'none'
-        }
-      },
-      hover: {
-        filter: {
-          type: 'none'
-        }
-      }
-    },
-    stroke: {
-      width: 0
-    },
-    theme: {
-      mode: theme.palette.mode
-    },
-    tooltip: {
-      fillSeriesColor: false
-    }
-  };
-};
-
-const iconMap = {
-  Desktop: (
-    <SvgIcon>
-      <ComputerDesktopIcon />
-    </SvgIcon>
-  ),
-  Tablet: (
-    <SvgIcon>
-      <DeviceTabletIcon />
-    </SvgIcon>
-  ),
-  Phone: (
-    <SvgIcon>
-      <PhoneIcon />
-    </SvgIcon>
-  )
-};
+const fillColor = (profitability) => profitability > 0
+  ? 'success'
+  : 'error'
 
 export const OverviewPositions = (props) => {
-  const { positionSeries, sx } = props;
-  const chartOptions = useChartOptions(positionSeries.map((position) => position.itemName));
+  const { positions = [], sx, selectedCategory } = props;
 
   return (
     <Card sx={sx}>
       <CardHeader title="Posições" />
-      <CardContent>
-        <Chart
-          height={300}
-          options={chartOptions}
-          series={positionSeries.map((position) => position.percentage)}
-          type="donut"
-          width="100%"
-        />
-        <Stack
-          alignItems="center"
-          direction="row"
-          justifyContent="center"
-          spacing={2}
-          sx={{ mt: 2 }}
+      <Scrollbar sx={{ flexGrow: 1 }}>
+        <Box sx={{ minWidth: 800 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Código
+                </TableCell>
+                <TableCell>
+                  Categoria
+                </TableCell>
+                <TableCell sortDirection="desc">
+                  Quantidade
+                </TableCell>
+                <TableCell>
+                  Valor
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {positions
+                .filter((position) => selectedCategory === '' || position.category === selectedCategory)
+                .map((position) => {
+                  return (
+                    <TableRow
+                      hover
+                      key={position.itemName}
+                    >
+                      <TableCell>
+                        {position.itemName}
+                      </TableCell>
+                      <TableCell>
+                        {position.category}
+                      </TableCell>
+                      <TableCell>
+                        {position.quantity}
+                      </TableCell>
+                      <TableCell sx={{ display: 'flex', justifyContent: 'space-around'}}>
+                        R$ {position.quantity * position.price}
+                        <SeverityPill color={fillColor(position.profitability)}>
+                          {position.profitability}
+                        </SeverityPill>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              }
+            </TableBody>
+          </Table>
+        </Box>
+      </Scrollbar>
+      <Divider />
+      <CardActions sx={{ justifyContent: 'flex-end' }}>
+        <Button
+          color="inherit"
+          endIcon={(
+            <SvgIcon fontSize="small">
+              <ArrowRightIcon />
+            </SvgIcon>
+          )}
+          size="small"
+          variant="text"
         >
-          {positionSeries.map((position, index) => {
-            return (
-              <Box
-                key={position.itemName}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center'
-                }}
-              >
-                <Typography
-                  sx={{ my: 1 }}
-                  variant="h6"
-                >
-                  {position.itemName}
-                </Typography>
-                <Typography
-                  color="text.secondary"
-                  variant="subtitle2"
-                >
-                  {position.percentage}%
-                </Typography>
-              </Box>
-            );
-          })}
-        </Stack>
-      </CardContent>
+          View all
+        </Button>
+      </CardActions>
     </Card>
   );
 };
 
-OverviewPositions.propTypes = {
-  chartSeries: PropTypes.array.isRequired,
-  labels: PropTypes.array.isRequired,
+OverviewPositions.prototype = {
+  positions: PropTypes.array,
   sx: PropTypes.object
 };

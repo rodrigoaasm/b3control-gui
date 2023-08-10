@@ -5,6 +5,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { AuthConsumer, AuthProvider } from 'src/contexts/auth-context';
+import { WalletProvider } from 'src/contexts/wallet-context';
 import { useNProgress } from 'src/hooks/use-nprogress';
 import { createTheme } from 'src/theme';
 import { createEmotionCache } from 'src/utils/create-emotion-cache';
@@ -36,16 +37,18 @@ const App = (props) => {
       </Head>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <AuthProvider>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <AuthConsumer>
-              {
-                (auth) => auth.isLoading
-                  ? <SplashScreen />
-                  : getLayout(<Component {...pageProps} />)
-              }
-            </AuthConsumer>
-          </ThemeProvider>
+          <WalletProvider>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <AuthConsumer>
+                {
+                  (auth) => auth.isLoading
+                    ? <SplashScreen />
+                    : getLayout(<Component {...pageProps} />)
+                }
+              </AuthConsumer>
+            </ThemeProvider>
+          </WalletProvider>
         </AuthProvider>
       </LocalizationProvider>
     </CacheProvider>
